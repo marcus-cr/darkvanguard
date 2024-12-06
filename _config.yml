@@ -16,7 +16,7 @@ timezone: America/New_York
 
 title: Dark Vanguard # the main title
 
-tagline: #A text-focused Jekyll theme # it will display as the subtitle
+tagline: A minimal blog about a cybersecurity professional. # it will display as the subtitle
 
 description: >- # used by seo meta and the atom feed
   A minimal blog about a cybersecurity professional.
@@ -69,7 +69,7 @@ analytics:
     id: # fill in your Matomo ID
     domain: # fill in your Matomo domain
   cloudflare:
-    id: JWcod5z_WNIEfwRBFPI6UtK-7jJQMY9Xha0NXEE- # fill in your Cloudflare Web Analytics token
+    id: #JWcod5z_WNIEfwRBFPI6UtK-7jJQMY9Xha0NXEE- # fill in your Cloudflare Web Analytics token
   fathom:
     id: # fill in your Fathom Site ID
 
@@ -150,7 +150,7 @@ pwa:
 paginate: 10
 
 # The base URL of your site
-baseurl: "https://darkvanguard.com"
+baseurl: "" #"https://darkvanguard.com"
 
 # ------------ The following options are not recommended to be modified ------------------
 
