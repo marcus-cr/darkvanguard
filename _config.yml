@@ -16,14 +16,14 @@ timezone: America/New_York
 
 title: Dark Vanguard # the main title
 
-tagline: A minimal blog about a cybersecurity professional. # it will display as the subtitle
+tagline: A minimal blog from a cybersecurity professional. # it will display as the subtitle
 
 description: >- # used by seo meta and the atom feed
-  A minimal blog about a cybersecurity professional.
+  A minimal blog from a cybersecurity professional.
 
 # Fill in the protocol & hostname for your site.
 # E.g. 'https://username.github.io', note that it does not end with a '/'.
-url: "/darkvg"
+url: "https://darkvanguard.com"
 
 github:
   username: marcus-cr # change to your GitHub username
@@ -88,7 +88,7 @@ pageviews:
 #     light — Use the light color scheme
 #     dark — Use the dark color scheme
 #
-theme_mode: dark # [light | dark]
+theme_mode: # [light | dark]
 
 # The CDN endpoint for media resources.
 # Notice that once it is assigned, the CDN url
@@ -98,7 +98,7 @@ theme_mode: dark # [light | dark]
 cdn:
 
 # the avatar on sidebar, support local or CORS resources
-avatar: https://avatars.githubusercontent.com/u/9014703?v=4
+avatar: /assets/img/favicons/web-app-manifest-512x512.png
 
 # The URL of the site-wide social preview image used in SEO `og:image` meta tag.
 # It can be overridden by a customized `page.image` in front matter.
@@ -150,7 +150,7 @@ pwa:
 paginate: 10
 
 # The base URL of your site
-baseurl: "" #"https://darkvanguard.com"
+baseurl: ""
 
 # ------------ The following options are not recommended to be modified ------------------
 
