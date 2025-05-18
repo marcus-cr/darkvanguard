@@ -1,5 +1,5 @@
 ---
-title: Building A WireGuard Site-to-Site Tunnel
+title: Building a WireGuard Site-to-Site Tunnel
 date: 2025-05-18 12:45:00 -0400
 categories: [Networking, VPN, WireGuard]
 tags: [WireGuard, Raspberry Pi, Linode, VPS, Site-to-Site]
@@ -10,7 +10,7 @@ I wanted to setup WireGuard so I can connect to my home network when on the road
 
 I also wanted to avoid Dynamic DNS or port forwards on my home router. I setup a DNS record with Cloudflare to my VPS' public static IPv4 address. 
 
-Also using a Raspberry Pi 5. The Pi will act as a client that connects to the WireGuard server on my VPS, which will route all traffic between. This guide will show you how to set up a secure tunnel quickly.
+Also using a Raspberry Pi 5. The Pi acts as a WireGuard client and maintains a persistent tunnel to the VPS, which acts as the bridge to my home LAN. This guide will show you how to set up a secure tunnel quickly.
 
 ---
 
@@ -44,15 +44,18 @@ chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 ```
 
-Edit `/etc/ssh/sshd_config` and look for these three options. Ensure that they are not commented out, and that the last two have  the value of "no" before saving, like so:
+Edit `/etc/ssh/sshd_config` and look for these three options. Ensure that they are not commented out, and that the last two have the value of "no" before saving, like so:
 
 ```bash
 Port 65535  # Changed from default of 22
 PermitRootLogin no
 PasswordAuthentication no
+X11Forwarding no  # Unnecessary to have it enabled since VPS is headless
 ```
 
-> SSH uses the default port of 22 which is frequently targeted by scanners and attackers. Recommending you pick a random high port instead.
+> SSH uses the default port of 22 which is frequently targeted by scanners and attackers. It is recommended that you pick a random high port instead!
+>
+> The option "PasswordAuthentication no" will require public key authentication. Make sure you add your pubkey to the authorized_keys file, and that "PubkeyAuthentication yes" is in your sshd_config file!
 {: .prompt-warning }
 
 Reload SSH:
@@ -82,10 +85,24 @@ sudo timedatectl set-ntp true
 ```bash
 sudo apt install unattended-upgrades
 sudo dpkg-reconfigure --priority=low unattended-upgrades
+sudo nano /etc/apt/apt.conf.d/50unattended-upgrades
 ```
 
-* Enable automatic reboots
-* Set reboot time to `04:30` after upgrading
+Make sure these lines were not commented out with the leading "//".
+
+```bash
+"origin=Debian,codename=${distro_codename}-updates";
+"origin=Debian,codename=${distro_codename},label=Debian";
+"origin=Debian,codename=${distro_codename},label=Debian-Security";
+"origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+```
+
+These two lines will cause the VPS to automatically reboot at 4:30 AM if a reboot is required after upgrading.
+
+```bash
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "4:30";
+```
 
 ### UFW firewall:
 
@@ -155,7 +172,7 @@ PersistentKeepalive = 25
 > Ensure you use the correct listening port you set up in UFW. You may have to change the interface of "eth0" if you are using a different OS. Make sure you put your correct private network address and netmask in the AllowedIPs of the Peer section.
 {: .prompt-warning }
 
-In this configuration, I chose the IP 10.10.0.1 for the VPS on the WG tunnel with a netmask of /29. Since I am not using that many devices at once on the network, this will lock down the available hosts to 6. You can change that if you want more devices to be able to connect to WireGuard.
+In this configuration, I chose the IP 10.10.0.1 for the VPS on the WG tunnel with a netmask of /29. Since I am not using that many devices at once on the network, this will lock down the total usable hosts to 6 (excluding network address and broadcast). You can change that if you want more devices to be able to connect to WireGuard.
 
 Make sure you add the actual contents of the private key into the PrivateKey section, not the file path. You'll have to add the Pi's public key that is created later under the Peer section of this configuration. We're assigning it the IP of 10.10.0.2 while adding the local network address I have setup at home of 192.168.100.0/24.
 
@@ -182,7 +199,7 @@ PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACC
 [Peer]
 PublicKey = <Linode public key>
 Endpoint = <linode_public_ip>:51820
-AllowedIPs = 0.0.0.0/0  # Set for full-tunnel instead of split-tunneling
+AllowedIPs = 10.10.0.0/29   # Allows the Pi to communicate with other devices on the WG subnet without tunneling all outbound traffic through the VPS
 PersistentKeepalive = 25
 ```
 
@@ -228,7 +245,7 @@ This should help prevent packet fragmentation and random slowdowns over LTE/5G. 
 
 When I switched from DigitalOcean (New York) to Linode (Atlanta), I went from \~80 Mbps to 160+ Mbps over Verizon 5G UW, with ping dropping to \~36 ms and jitter nearly gone. Performance varies by cell signal strength (as expected), but the tunnel itself is solid.
 
-Without having Linode act as a jumpbox my speeds should have increased as well. Decided this was a fair tradeoff for some piece of mind. Even though the Pi 5 did not have a CPU bottleneck, I'm sure enterprise network appliances would show significantly better speeds.
+If I weren’t routing through Linode as a jumpbox, I’d likely get even higher speeds. Ultimately decided that this was a fair tradeoff for privacy. Even though the Pi 5 did not show a CPU bottleneck, I'm sure a dedicated network appliance designed for high VPN throughput would show significantly better speeds than the Pi. Maybe I'll take advantage of my 1 Gb internet speeds by incorporating a pfSense or Protectli Vault box in the future.
 
 ---
 
@@ -252,6 +269,4 @@ PersistentKeepalive = 25
 
 ## Final Thoughts
 
-Want even more flexibility? Add a second VPS in another different region, and use multiple WireGuard configs on your phone or laptop to switch based on location. I may cover multi-region/failover configs in a future post.
-
-Let me know if you have questions or want help adapting this to your own setup.
+Want even more flexibility? Add a second VPS in another different region, and use multiple WireGuard configs on your phone or laptop to switch based on your current location. I may cover multi-region/failover configs in a future post.
