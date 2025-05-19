@@ -243,9 +243,13 @@ This should help prevent packet fragmentation and random slowdowns over LTE/5G. 
 
 ## Step 6: Real-World Performance
 
-When I switched from DigitalOcean (New York) to Linode (Atlanta), I went from \~80 Mbps to 160+ Mbps over Verizon 5G UW, with ping dropping to \~36 ms and jitter nearly gone. Performance varies by cell signal strength (as expected), but the tunnel itself is solid.
+After resizing my Linode VPS from 1 to 2 CPUs, I re-ran throughput tests between my Pi 5 at home and the VPS. I consistently hit 900 Mbps in both directions with iperf3, and CPU usage on both ends stayed below 70%. The earlier bottleneck with a single CPU on Linode had it pinned at 100%, capping speeds at around 500 Mbps.
 
-If I weren’t routing through Linode as a jumpbox, I’d likely get even higher speeds. Ultimately decided that this was a fair tradeoff for privacy. Even though the Pi 5 did not show a CPU bottleneck, I'm sure a dedicated network appliance designed for high VPN throughput would show significantly better speeds than the Pi. Maybe I'll take advantage of my 1 Gb internet speeds by incorporating a pfSense or Protectli Vault box in the future.
+Some retries are expected at these speeds, especially across the public internet. Retry counts in iperf3 (313 one way, 137 the other) were within the normal range for a high-throughput, encrypted connection over the public internet. There were no significant signs of real-world packet loss or instability. With the right VPS resources, WireGuard can push gigabit-class speeds—even with a $100 Raspberry Pi 5 (4GB version, including power supply).
+
+I also tested OpenSpeedTest running in a Docker container at home, using full-tunnel WireGuard from my phone on Verizon 5G UW (4 out of 5 bars). The results were 63.5 Mbps down / 20.4 Mbps up with 36 ms ping and 3 ms jitter. That seems typical for a VPN over a mobile connection, and I’d expect better speeds with stronger signal or less carrier throttling. For reference, the same cell signal on Speedtest.net (not using the tunnel) gave 452 Mbps down / 23 Mbps up with 78 ms ping and 11 ms jitter, using a server located 24 miles away. 
+
+Overall, the tunnel is stable and fast enough for anything short of multi-gigabit use. If you need true line-rate speeds for heavy workloads or have faster-than-gigabit internet at home, a dedicated firewall appliance or high-end router (like pfSense on a Protectli box) might make sense. But for most people, a Pi 5 is more than enough.
 
 ---
 
@@ -270,3 +274,14 @@ PersistentKeepalive = 25
 ## Final Thoughts
 
 Want even more flexibility? Add a second VPS in another different region, and use multiple WireGuard configs on your phone or laptop to switch based on your current location. I may cover multi-region/failover configs in a future post.
+
+---
+
+## Lessons Learned
+
+- **CPU matters:** If you’re seeing throughput capped below your ISP’s line rate, check VPS CPU usage. Upgrading from 1 to 2 vCPUs on Linode more than doubled my WireGuard performance.
+- **The Pi 5 can handle it:** Even at near-gigabit speeds, a Raspberry Pi 5 doesn’t break a sweat as a WireGuard endpoint.
+- **Most mobile bottlenecks are network, not VPN:** Cellular performance is limited by the carrier and signal, not the VPN tunnel or your home hardware.
+- **WireGuard is efficient:** With sane configs and enough CPU, you’ll get speeds most consumer VPN services can’t touch.
+
+---
