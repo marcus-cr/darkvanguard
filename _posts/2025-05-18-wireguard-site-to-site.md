@@ -27,7 +27,7 @@ Also using a Raspberry Pi 5. The Pi acts as a WireGuard client and maintains a p
 
 After you have your VPS running, we'll need to SSH in and get it set up before touching WireGuard. You can use a Linux terminal or PuTTY on Windows.
 
-### Update and create non-root user:
+### Update and create non-root user
 
 ```bash
 sudo apt update && sudo apt upgrade -y
@@ -36,7 +36,7 @@ sudo usermod -aG sudo mark
 ```
 We'll be using the regular user "mark" for everything. The user will need admin privileges, so we've added it to the sudo group.
 
-### SSH hardening:
+### SSH hardening
 
 ```bash
 # Create your own SSH keys, then add the public key to ~/.ssh/authorized_keys
@@ -64,14 +64,14 @@ Reload SSH:
 sudo systemctl reload ssh
 ```
 
-### Lock root user's password:
+### Lock root user's password
 
 ```bash
 sudo passwd -l root
 ```
 This will prevent the root user from logging in. Since we've added the "mark" user to the sudo group, they will still be able to execute admin commands as if root. This step is optional.
 
-### Set timezone:
+### Set timezone
 
 ```bash
 sudo timedatectl set-timezone America/New_York
@@ -80,7 +80,7 @@ sudo timedatectl set-ntp true
 > Adjust to your timezone as needed. You can use ```timedatectl list-timezones``` to find yours.
 {: .prompt-tip }
 
-### Enable unattended upgrades:
+### Enable unattended upgrades
 
 ```bash
 sudo apt install unattended-upgrades
@@ -104,7 +104,7 @@ Unattended-Upgrade::Automatic-Reboot "true";
 Unattended-Upgrade::Automatic-Reboot-Time "4:30";
 ```
 
-### UFW firewall:
+### UFW firewall
 
 ```bash
 sudo apt install ufw
@@ -142,7 +142,7 @@ Close or firewall anything you’re not explicitly using.
 
 ## Step 3: Install and Configure WireGuard
 
-### On Linode VPS:
+### On Linode VPS
 
 ```bash
 sudo apt install wireguard
@@ -178,7 +178,7 @@ Make sure you add the actual contents of the private key into the PrivateKey sec
 
 ---
 
-### On the Raspberry Pi:
+### On the Raspberry Pi
 
 ```bash
 sudo apt install wireguard
